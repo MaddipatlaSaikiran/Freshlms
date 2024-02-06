@@ -1,0 +1,120 @@
+package com.freshlms.sterDefinatiions.ui;
+
+import com.freshlms.ui.utils.Selenium_Utils;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import com.freshlms.ui.utils.Excel_Utils;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+public class MyStepdefs {
+
+    @Given("Launch browser")
+    public void launchBrowser() {
+        try{
+          read_excel();
+            //extract_email_web_page();
+
+            System.out.print("Browser Launched");
+        }
+        catch (Exception e){
+
+        }
+
+
+    }
+
+    private static final String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+    public  StringJoiner extract_email_web_page(){
+        StringJoiner return_value=new StringJoiner(" , ");
+        ArrayList<String> ele=new ArrayList<>();
+        ele.add("Saikiran");
+        ele.add("sai@gmail.com");
+        ele.add("kiran@outlook.com");
+        //initialize the Pattern object
+        Pattern pattern = Pattern.compile(regex);
+
+        for (String value:ele){
+            Matcher matcher = pattern.matcher(value);
+            if(matcher.matches()){
+                return_value.add(value);
+                System.out.print("Match Value is :"+return_value);
+
+            }
+            System.out.println("Email " + value + " is " + (matcher.matches() ? "valid" : "invalid"));
+        }
+        return return_value;
+    }
+    public  void read_excel() throws IOException {
+        String path="C:\\Users\\mkiran8\\Desktop\\Freshlms\\Freshlms-main\\Freshlms-main\\Freshlms\\Freshlms\\Freshlms-automation\\Demo.xlsx";
+        XSSFWorkbook wb;
+        try{
+            FileInputStream inputStream=new FileInputStream(path);
+
+             wb=new XSSFWorkbook(inputStream);
+            XSSFSheet sheet=wb.getSheet("Sheet1");
+//            //Getting no.of columns
+//            XSSFRow row=sheet.getRow(0);
+//            int colum_count=row.getLastCellNum();
+//            //System.out.println(colum_count);
+//            XSSFCell cell=null;
+//            //Getting Column Names
+//            for (int i=0;i<colum_count;i++){
+//                cell=row.getCell(i);
+//                String column_name=cell.getStringCellValue();
+//
+//                System.out.print("Column Name is "+column_name);
+
+                XSSFRow row=null;
+                XSSFCell cell=null;
+                String col1=null;
+                String col2=null;
+                String col2_Value="Write to Excel";
+                for (int i=1;i<=sheet.getLastRowNum();i++) {
+                    row=sheet.getRow(i);
+
+                    for (int j=0;j<row.getLastCellNum();j++) {
+                        cell=row.getCell(j);
+                        if(j==0) {
+                            col1=cell.getStringCellValue();
+                            //Web driver Code
+                            //Extracting Email id
+//                            ArrayList<String> web_page_values=new ArrayList<>();
+//                            web_page_values.add(col1);
+                        StringJoiner return_Value=    extract_email_web_page();
+
+                           cell=row.createCell(1);
+                            CellType cell_Type=cell.getCellType();
+                            System.out.print("CellTyepe"+cell_Type);
+                            //cell.setCellType(cell_Type);
+                            cell.setCellValue(String.valueOf((StringJoiner) return_Value));
+                        }
+//                        if(j==1) {
+//                            col2=cell.getStringCellValue();
+//                        }
+                    }
+                    System.out.print("Col1"+col1);
+                    FileOutputStream os=new FileOutputStream(path);
+                    wb.write(os);
+                    os.close();
+
+                }
+            } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+        }
+    }
+}
